@@ -17,7 +17,7 @@ class ProductTranslationOptions(TranslationOptions):
 
 @register(Property)
 class ProductTranslationOptions(TranslationOptions):
-    fields = ('title', 'condition')
+    fields = ('title', 'description',)
 
 @register(Review)
 class ProductTranslationOptions(TranslationOptions):

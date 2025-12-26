@@ -19,7 +19,7 @@ class ProductAdmin(TranslationAdmin):
             'screen': ('modeltranslation/css/tabbed_translation_fields.css',),
         }
 
-@admin.register(City, Review, UserProfile)
+@admin.register(City, Review,Region, UserProfile)
 class ProductAdmin(TranslationAdmin):
     class Media:
         js = (
@@ -32,4 +32,3 @@ class ProductAdmin(TranslationAdmin):
         }
 
 
-admin.site.register(PropertyImage)

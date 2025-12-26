@@ -12,15 +12,13 @@ class UserProfile(AbstractUser):
         ('buyer', 'buyer'))
     avatar = models.ImageField(upload_to='avatars/', null=True, blank=True)
     role = models.CharField(choices=ROLE_CHOICES,max_length=16,default='buyer')
-    first_name = models.CharField(max_length=50)
-    last_name = models.CharField(max_length=55)
-    username = models.CharField(max_length=80, unique=True)
 
+    def __str__(self):
+        return f'{self.first_name} {self.last_name}, {self.username}'
 
 
 class City(models.Model):
-    city_name = models.CharField(max_length=30,unique=True)
-    city_image = models.ImageField(upload_to='cities/', null=True, blank=True)
+    city_name = models.CharField(max_length=30)
 
     def __str__(self):
         return f'{self.city_name}'
@@ -34,35 +32,38 @@ class Region(models.Model):
 
 class Property(models.Model):
     PROPERTY_TYPE_CHOICES = (
-        ('Apartment', 'Apartment'),
-        ('House', 'House'),
+        ('apartment', 'apartment'),
+        ('house', 'house'),
+        ('land', 'land'),
+        ('commercial', 'commercial'),
     )
     CONDITIONS = (
         ('new', 'New'),
         ('good', 'Good'),
         ('needs_repair', 'Needs repair'),
     )
-    title = models.CharField(max_length=70)
+    title = models.CharField(max_length=100)
     city = models.ForeignKey(City, on_delete=models.CASCADE)
     region = models.ForeignKey(Region, on_delete=models.CASCADE)
+    district = models.CharField(max_length=100,null=True,blank=True)
+    street = models.CharField(max_length=150,null=True,blank=True)
+    area = models.DecimalField(max_digits=8,decimal_places=2,null=True,blank=True)
     price = models.PositiveIntegerField()
     property_type = models.CharField(max_length=50,choices=PROPERTY_TYPE_CHOICES)
-    rooms = models.PositiveIntegerField(verbose_name='Количество комнат')
-    floor = models.PositiveIntegerField(verbose_name='Этаж')
-    total_floors = models.PositiveIntegerField(verbose_name='Количество этажей в здании')
+    rooms = models.PositiveIntegerField()
+    floor = models.PositiveIntegerField()
+    total_floors = models.PositiveIntegerField()
     condition = models.CharField(max_length=20, choices=CONDITIONS)
     documents = models.BooleanField(default=False)
-    seller = models.ForeignKey(
-        UserProfile,
-        on_delete=models.CASCADE,
-    )
+    seller = models.ForeignKey(UserProfile,on_delete=models.CASCADE)
+    description = models.TextField(max_length=500,null=True,blank=True)
 
     def __str__(self):
         return f'{self.title} ({self.get_property_type_display()}) — {self.city}, Хозяин: {self.seller}'
 
 
 class PropertyImage(models.Model):
-    property = models.ForeignKey(Property, on_delete=models.CASCADE)
+    property = models.ForeignKey(Property, on_delete=models.CASCADE,related_name='images')
     image = models.ImageField(upload_to='property_images')
 
     def __str__(self):
@@ -70,15 +71,14 @@ class PropertyImage(models.Model):
 
 
 class Review(models.Model):
-    property = models.ForeignKey(Property,on_delete=models.CASCADE)
     buyer = models.ForeignKey(UserProfile,on_delete=models.CASCADE)
+    seller = models.ForeignKey(UserProfile, related_name='reviews', on_delete=models.CASCADE, null=True, blank=True)
     rating = models.PositiveIntegerField(choices=[(i, str(i)) for i in range(1, 6)])
     comment = models.TextField()
     created_date = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return f'Отзыв от {self.buyer} на {self.property} — {self.rating}'
-
+        return f'{self.buyer} {self.seller} {self.rating}'
 
 
 
